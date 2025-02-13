@@ -14,7 +14,7 @@ local config = {
     "gpt-4o",
     "gpt-4o-mini",
   },
-  system_prompt = "You're an awesome programmer. You like python",
+  system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. You code mainly using Python and Lua. Prefer answering using markdowm formatting.",
   window_sizes = {
     output = 15, -- height of input window
     info = nil, -- height of info window
