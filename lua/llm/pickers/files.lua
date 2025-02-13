@@ -39,6 +39,10 @@ function M.pick_files(config)
       end
       table.insert(files_in_context, item.file)
       vim.api.nvim_buf_set_lines(info.buf, 0, -1, false, files_in_context)
+
+      -- Move cursor to input buffer
+      -- TODO: this doesn't work.
+      -- vim.api.nvim_set_current_buf(windows.windows.input.buf)
     end,
   })
 end

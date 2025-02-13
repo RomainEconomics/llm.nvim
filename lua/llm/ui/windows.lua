@@ -1,6 +1,82 @@
 local M = {}
 
 M.windows = nil
+M.is_visible = false -- Track visibility state
+M.stored_configs = nil -- Add this to store window configs
+
+---@param config? Config
+function M.toggle_windows(config)
+  if M.is_visible and M.windows then
+    -- Store windows configs befor hiding
+    M.stored_configs = {}
+    -- Hide windows
+    for name, handles in pairs(M.windows) do
+      if vim.api.nvim_win_is_valid(handles.win) then
+        M.stored_configs[name] = {
+          width = vim.api.nvim_win_get_width(handles.win),
+          height = vim.api.nvim_win_get_height(handles.win),
+          row = vim.api.nvim_win_get_position(handles.win)[1],
+          col = vim.api.nvim_win_get_position(handles.win)[2],
+        }
+        vim.api.nvim_win_hide(handles.win)
+      end
+    end
+    M.is_visible = false
+  else
+    -- Show windows if they exist
+    if M.windows and M.stored_configs then
+      -- Create the main vertical split
+      vim.cmd("vsplit")
+      vim.cmd("wincmd l")
+
+      local main_width = vim.api.nvim_win_get_width(0)
+
+      -- Restore windows in the correct order
+      local window_order = { "output", "info", "input" }
+      local first = true
+      local total_height = vim.api.nvim_win_get_height(0)
+      local current_height = 0
+
+      for _, name in ipairs(window_order) do
+        local handles = M.windows[name]
+        local stored = M.stored_configs[name]
+
+        if not first then
+          vim.cmd("split")
+        end
+
+        handles.win = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_set_buf(handles.win, handles.buf)
+
+        if stored then
+          -- Restore window dimensions
+          if name == "output" then
+            vim.api.nvim_win_set_height(handles.win, stored.height)
+            current_height = stored.height
+          elseif name == "info" then
+            local info_height = math.min(stored.height, total_height - current_height - 3)
+            vim.api.nvim_win_set_height(handles.win, info_height)
+            current_height = current_height + info_height
+          elseif name == "input" then
+            -- Input window takes remaining space
+            vim.api.nvim_win_set_height(handles.win, total_height - current_height)
+          end
+
+          -- Restore window width
+          vim.api.nvim_win_set_width(handles.win, math.min(stored.width, main_width))
+        end
+
+        first = false
+      end
+
+      M.is_visible = true
+    else
+      -- Windows don't exist, create new ones
+      require("llm.ui").setup(config or require("llm").config)
+      M.is_visible = true
+    end
+  end
+end
 
 ---Create Windows
 ---@param config Config
@@ -57,6 +133,8 @@ function M.create_windows(config)
   vim.api.nvim_set_option_value("modifiable", true, { buf = output_buf })
   vim.api.nvim_set_option_value("filetype", config.filetype, { buf = output_buf })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = input_buf })
+
+  M.is_visible = true
 
   return M.windows
 end

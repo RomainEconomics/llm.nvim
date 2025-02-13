@@ -1,6 +1,7 @@
 ---@module "snacks"
 
 local curl = require("plenary.curl")
+local buf_updates = require("llm.ui.buffer_updates")
 
 local M = {}
 
@@ -52,11 +53,10 @@ end
 
 ---Call OpenAI API chat
 ---@param content string
----@param on_chunk function
 ---@param config Config
 ---@param files_context string?
 ---@return string
-function M.call_openai(content, on_chunk, config, files_context)
+function M.call_openai(content, config, files_context)
   local accumulated_message = ""
 
   M.messages = build_messages("user", content, config.system_prompt, files_context)
@@ -94,9 +94,7 @@ function M.call_openai(content, on_chunk, config, files_context)
       end
 
       accumulated_message = accumulated_message .. msg
-      if on_chunk then
-        on_chunk(msg)
-      end
+      buf_updates.update_output_buffer(msg)
     end,
   })
 
@@ -105,11 +103,10 @@ end
 
 ---Call Anthropic API chat
 ---@param content string
----@param on_chunk function
 ---@param config Config
 ---@param files_context string?
 ---@return string
-function M.call_claude(content, on_chunk, config, files_context)
+function M.call_claude(content, config, files_context)
   local accumulated_message = ""
 
   -- No system prompt with claude models. Instead passed through the request itself
@@ -167,9 +164,7 @@ function M.call_claude(content, on_chunk, config, files_context)
       end
 
       accumulated_message = accumulated_message .. msg
-      if on_chunk then
-        on_chunk(msg)
-      end
+      buf_updates.update_output_buffer(msg)
     end,
   })
 
@@ -180,15 +175,14 @@ end
 
 ---Call LLM api provider
 ---@param content string
----@param on_chunk function
 ---@param config Config
 ---@param files_context string?
-function M.call_llm(content, on_chunk, config, files_context)
+function M.call_llm(content, config, files_context)
   Snacks.notifier.notify("Model user: " .. config.model, "info", { title = "Model used" })
   if string.find(config.model, "claude") then
-    M.call_claude(content, on_chunk, config, files_context)
+    M.call_claude(content, config, files_context)
   elseif string.find(config.model, "gpt") then
-    M.call_openai(content, on_chunk, config, files_context)
+    M.call_openai(content, config, files_context)
   else
     error("Model not handled currently")
   end
