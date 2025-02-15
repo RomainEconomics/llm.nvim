@@ -1,3 +1,4 @@
+local chat = require("llm.chat")
 local M = {}
 
 M.windows = nil
@@ -82,6 +83,8 @@ end
 ---@param config Config
 ---@return table
 function M.create_windows(config)
+  chat.reset_provider() -- Reset provider when creating new windows
+
   -- Create the main vertical split
   vim.cmd("vsplit")
 

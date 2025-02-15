@@ -8,6 +8,8 @@ local windows = require("llm.ui.windows")
 
 local M = {}
 
+M.messages = nil
+
 ---Send input
 ---@param config Config
 local function send_input(config)
@@ -32,6 +34,7 @@ local function send_input(config)
 
   -- Call API provider
   chat.call_llm(input_text, config, files_content_in_context)
+
   vim.api.nvim_buf_set_lines(output_buf, -1, -1, false, { "" })
 
   -- Clear user input
@@ -45,6 +48,7 @@ function M.setup(config)
     windows.toggle_windows(config) -- Pass config to toggle_windows
   end, { desc = "Toggle chat windows" })
 
+  -- create windows reset chat history, but only for a given provider
   local chat_windows = windows.create_windows(config)
   session.initialize_session(chat_windows.output.buf, config)
 
