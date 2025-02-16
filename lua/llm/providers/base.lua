@@ -28,9 +28,8 @@ local _role = {
 ---@param role Role
 ---@param content string
 ---@param system_prompt string?
----@param files_context string?
 ---@return table
-function Provider:build_messages(role, content, system_prompt, files_context)
+function Provider:build_messages(role, content, system_prompt)
   local messages = self.messages
 
   Snacks.debug("MESSAGES", messages)
@@ -47,13 +46,6 @@ function Provider:build_messages(role, content, system_prompt, files_context)
     else
       messages = {}
     end
-  end
-
-  if files_context ~= nil then
-    table.insert(messages, {
-      role = "user",
-      content = files_context,
-    })
   end
 
   table.insert(messages, {

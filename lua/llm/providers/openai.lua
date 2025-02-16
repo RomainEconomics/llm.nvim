@@ -21,7 +21,18 @@ end
 function OpenAI:call(content, config, files_context)
   local accumulated_message = ""
 
-  self.messages = self:build_messages("user", content, config.system_prompt, files_context)
+  self.messages = self:build_messages("user", content, config.system_prompt)
+  local copy_messages = vim.deepcopy(self.messages)
+
+  -- Add files context if present
+  -- We copy the message and don't store the files_context to allow the files in context to be changed
+  -- between chat messages (could be same files but with changes made in it)
+  if files_context ~= nil then
+    table.insert(copy_messages, {
+      role = "user",
+      content = files_context,
+    })
+  end
 
   curl.post("https://api.openai.com/v1/chat/completions", {
     raw = { "--no-buffer", "--silent", "--show-error" },
@@ -31,7 +42,7 @@ function OpenAI:call(content, config, files_context)
     },
     body = vim.fn.json_encode({
       model = config.model,
-      messages = self.messages,
+      messages = copy_messages,
       stream = true,
     }),
     stream = function(_, chunk)

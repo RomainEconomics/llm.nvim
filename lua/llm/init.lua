@@ -13,6 +13,7 @@ local config = {
     "claude-3-5-sonnet-20241022",
     "gpt-4o",
     "gpt-4o-mini",
+    "gemini-2.0-flash",
   },
   system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. You code mainly using Python and Lua. Prefer answering using markdowm formatting. When answering, you don't need to send back the provided context if you don't modify it (like if given a file with function and classes, if they are long, you can only define theirs names and modify only the needed parts)",
   window_sizes = {

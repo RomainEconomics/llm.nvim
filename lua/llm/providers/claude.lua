@@ -23,7 +23,18 @@ function Claude:call(content, config, files_context)
 
   Snacks.debug("build_messages")
   -- No system prompt with claude models. Instead passed through the request itself
-  self.messages = self:build_messages("user", content, nil, files_context)
+  self.messages = self:build_messages("user", content, nil)
+  local copy_messages = vim.deepcopy(self.messages)
+
+  -- Add files context if present
+  -- We copy the message and don't store the files_context to allow the files in context to be changed
+  -- between chat messages (could be same files but with changes made in it)
+  if files_context ~= nil then
+    table.insert(copy_messages, {
+      role = "user",
+      content = files_context,
+    })
+  end
 
   Snacks.notifier.notify("Start calling claude", "info")
 
@@ -36,7 +47,7 @@ function Claude:call(content, config, files_context)
     },
     body = vim.fn.json_encode({
       model = config.model,
-      messages = self.messages,
+      messages = copy_messages,
       max_tokens = 4096,
       stream = true,
     }),

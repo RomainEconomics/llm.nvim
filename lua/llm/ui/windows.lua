@@ -3,87 +3,58 @@ local M = {}
 
 M.windows = nil
 M.is_visible = false -- Track visibility state
-M.stored_configs = nil -- Add this to store window configs
+M.stored_contents = nil -- Store window contents
 
 ---@param config? Config
 function M.toggle_windows(config)
   if M.is_visible and M.windows then
-    -- Store windows configs befor hiding
-    M.stored_configs = {}
-    -- Hide windows
+    -- Store windows contents and configs before hiding
+    M.stored_contents = {}
+
+    -- Store contents and configs for each window
     for name, handles in pairs(M.windows) do
-      if vim.api.nvim_win_is_valid(handles.win) then
-        M.stored_configs[name] = {
-          width = vim.api.nvim_win_get_width(handles.win),
-          height = vim.api.nvim_win_get_height(handles.win),
-          row = vim.api.nvim_win_get_position(handles.win)[1],
-          col = vim.api.nvim_win_get_position(handles.win)[2],
-        }
+      if vim.api.nvim_win_is_valid(handles.win) and vim.api.nvim_buf_is_valid(handles.buf) then
+        -- Store buffer contents
+        M.stored_contents[name] = vim.api.nvim_buf_get_lines(handles.buf, 0, -1, false)
+
+        -- Close window
         vim.api.nvim_win_hide(handles.win)
       end
     end
     M.is_visible = false
   else
-    -- Show windows if they exist
-    if M.windows and M.stored_configs then
-      -- Create the main vertical split
-      vim.cmd("vsplit")
-      vim.cmd("wincmd l")
+    -- Check for existing buffers
+    local existing_buffers = {
+      output = vim.fn.bufnr("ChatOutput"),
+      info = vim.fn.bufnr("ChatInfo"),
+      input = vim.fn.bufnr("ChatInput"),
+    }
 
-      local main_width = vim.api.nvim_win_get_width(0)
+    -- Create new windows
+    M.create_windows(config or require("llm").config, existing_buffers)
 
-      -- Restore windows in the correct order
-      local window_order = { "output", "info", "input" }
-      local first = true
-      local total_height = vim.api.nvim_win_get_height(0)
-      local current_height = 0
-
-      for _, name in ipairs(window_order) do
-        local handles = M.windows[name]
-        local stored = M.stored_configs[name]
-
-        if not first then
-          vim.cmd("split")
+    -- Restore contents if they exist
+    if M.stored_contents then
+      for name, handles in pairs(M.windows) do
+        if M.stored_contents[name] and vim.api.nvim_buf_is_valid(handles.buf) then
+          vim.api.nvim_buf_set_lines(handles.buf, 0, -1, false, M.stored_contents[name])
         end
-
-        handles.win = vim.api.nvim_get_current_win()
-        vim.api.nvim_win_set_buf(handles.win, handles.buf)
-
-        if stored then
-          -- Restore window dimensions
-          if name == "output" then
-            vim.api.nvim_win_set_height(handles.win, stored.height)
-            current_height = stored.height
-          elseif name == "info" then
-            local info_height = math.min(stored.height, total_height - current_height - 3)
-            vim.api.nvim_win_set_height(handles.win, info_height)
-            current_height = current_height + info_height
-          elseif name == "input" then
-            -- Input window takes remaining space
-            vim.api.nvim_win_set_height(handles.win, total_height - current_height)
-          end
-
-          -- Restore window width
-          vim.api.nvim_win_set_width(handles.win, math.min(stored.width, main_width))
-        end
-
-        first = false
       end
-
-      M.is_visible = true
-    else
-      -- Windows don't exist, create new ones
-      require("llm.ui").setup(config or require("llm").config)
-      M.is_visible = true
     end
+
+    M.is_visible = true
   end
 end
 
 ---Create Windows
 ---@param config Config
+---@param existing_buffers? table
 ---@return table
-function M.create_windows(config)
-  chat.reset_provider() -- Reset provider when creating new windows
+function M.create_windows(config, existing_buffers)
+  if existing_buffers == nil then
+    chat.reset_provider() -- Reset provider only when creating windows from scratch (not when toggling windows on/off)
+  end
+  existing_buffers = existing_buffers or {}
 
   -- Create the main vertical split
   vim.cmd("vsplit")
@@ -91,23 +62,38 @@ function M.create_windows(config)
   -- Create the right-side layout with 3 windows
   vim.cmd("wincmd l")
 
-  -- Create the output window (top)
-  local output_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_name(output_buf, "ChatOutput")
+  -- Create or reuse the output window (top)
+  local output_buf
+  if existing_buffers.output and existing_buffers.output ~= -1 then
+    output_buf = existing_buffers.output
+  else
+    output_buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_name(output_buf, "ChatOutput")
+  end
   vim.api.nvim_win_set_buf(0, output_buf)
   local output_win = vim.api.nvim_get_current_win()
 
-  -- Create the middle info window
+  -- Create or reuse the middle info window
   vim.cmd("split")
-  local info_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_name(info_buf, "ChatInfo")
+  local info_buf
+  if existing_buffers.info and existing_buffers.info ~= -1 then
+    info_buf = existing_buffers.info
+  else
+    info_buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_name(info_buf, "ChatInfo")
+  end
   vim.api.nvim_win_set_buf(0, info_buf)
   local info_win = vim.api.nvim_get_current_win()
 
-  -- Create the input window (bottom)
+  -- Create or reuse the input window (bottom)
   vim.cmd("split")
-  local input_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_name(input_buf, "ChatInput")
+  local input_buf
+  if existing_buffers.input and existing_buffers.input ~= -1 then
+    input_buf = existing_buffers.input
+  else
+    input_buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_name(input_buf, "ChatInput")
+  end
   vim.api.nvim_win_set_buf(0, input_buf)
   local input_win = vim.api.nvim_get_current_win()
 
@@ -140,6 +126,11 @@ function M.create_windows(config)
   M.is_visible = true
 
   return M.windows
+end
+
+function M.clear_stored_data()
+  M.stored_contents = nil
+  M.stored_configs = nil
 end
 
 function M.close_windows()
