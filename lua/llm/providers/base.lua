@@ -32,8 +32,6 @@ local _role = {
 function Provider:build_messages(role, content, system_prompt)
   local messages = self.messages
 
-  Snacks.debug("MESSAGES", messages)
-
   if messages == nil then
     -- claude doesn't allow system promts in messages, but instead in the http request
     if system_prompt ~= nil then

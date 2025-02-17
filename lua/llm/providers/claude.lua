@@ -21,7 +21,6 @@ end
 function Claude:call(content, config, files_context)
   local accumulated_message = ""
 
-  Snacks.debug("build_messages")
   -- No system prompt with claude models. Instead passed through the request itself
   self.messages = self:build_messages("user", content, nil)
   local copy_messages = vim.deepcopy(self.messages)
