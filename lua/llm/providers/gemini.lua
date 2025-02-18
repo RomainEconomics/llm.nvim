@@ -71,10 +71,10 @@ function Gemini:call(content, config, files_context)
         buf_updates.update_output_buffer(msg)
 
         if finished == "STOP" then
-          Snacks.debug("END STREAM")
-          Snacks.debug("FInal message", accumulated_message)
+          -- Snacks.debug("END STREAM")
+          -- Snacks.debug("FInal message", accumulated_message)
           local metadata = data.usageMetadata
-          Snacks.debug(metadata)
+          -- Snacks.debug(metadata)
           -- We add model response to the `self.messages` and not the copy
           self.messages = self:build_messages("assistant", accumulated_message)
           return
