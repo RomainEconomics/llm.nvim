@@ -1,5 +1,5 @@
-vim.opt.runtimepath:append("~/Documents/repos/llm.nvim")
+-- vim.opt.runtimepath:append("~/Documents/repos/llm.nvim")
 -- require("llm").llm_with_picker()
 -- require("llm").llm_with_history()
-require("llm").llm()
+-- require("llm").llm()
 -- require("llm").llm({ model = "gpt-4o" })
