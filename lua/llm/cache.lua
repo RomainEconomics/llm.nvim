@@ -40,7 +40,6 @@ function M.save_cache(data, config)
     local file_path = M.get_cache_file_path(config)
     local json_str = vim.fn.json_encode(data)
     vim.fn.writefile({ json_str }, file_path)
-    Snacks.debug("Save cache", file_path, json_str)
   end)
 
   if not ok then

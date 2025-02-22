@@ -44,8 +44,6 @@ local function send_input(config)
         -- Save chat history
         local filepath = history.save_chat(config, promise.messages)
         -- Cache last history file for a given project
-
-        Snacks.debug("Before saving", config.model)
         cache.save_cache({ history_path = filepath, cwd = vim.fn.getcwd(), model = config.model }, config)
       end
     end)
