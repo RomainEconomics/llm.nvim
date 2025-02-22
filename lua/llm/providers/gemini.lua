@@ -16,12 +16,13 @@ end
 ---Call Gemini API chat
 ---@param content string
 ---@param config Config
+---@param callback function
 ---@param files_context string?
 ---@return string
-function Gemini:call(content, config, files_context)
+function Gemini:call(content, config, callback, files_context)
   local accumulated_message = ""
 
-  self.messages = self:build_messages("user", content, config.system_prompt, files_context)
+  self.messages = self:build_messages("user", content, config.system_prompt)
   local messages = vim.deepcopy(self.messages)
 
   -- Add files context if present
@@ -77,6 +78,7 @@ function Gemini:call(content, config, files_context)
           -- Snacks.debug(metadata)
           -- We add model response to the `self.messages` and not the copy
           self.messages = self:build_messages("assistant", accumulated_message)
+          callback()
           return
         end
       end,

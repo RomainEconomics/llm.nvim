@@ -16,9 +16,10 @@ end
 ---Call OpenAI API chat
 ---@param content string
 ---@param config Config
+---@param callback function
 ---@param files_context string?
 ---@return string
-function OpenAI:call(content, config, files_context)
+function OpenAI:call(content, config, callback, files_context)
   local accumulated_message = ""
 
   self.messages = self:build_messages("user", content, config.system_prompt)
@@ -52,6 +53,7 @@ function OpenAI:call(content, config, files_context)
 
       if chunk == "data: [DONE]" then
         self.messages = self:build_messages("assistant", accumulated_message)
+        callback()
         return
       end
 

@@ -56,7 +56,11 @@ function Provider:build_messages(role, content, system_prompt)
   return self.messages
 end
 
-function Provider:call(content, config, files_context)
+---@param content string
+---@param config Config
+---@param callback function
+---@param files_context string?
+function Provider:call(content, config, callback, files_context)
   error("Provider must implement call method")
 end
 

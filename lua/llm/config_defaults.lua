@@ -1,0 +1,30 @@
+return {
+  model = "gpt-4o-mini",
+  available_models = {
+    "claude-3-5-haiku-20241022",
+    "claude-3-5-sonnet-20241022",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gemini-2.0-flash",
+  },
+  system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. You code mainly using Python and Lua. Prefer answering using markdowm formatting. When answering, you don't need to send back the provided context if you don't modify it (like if given a file with function and classes, if they are long, you can only define theirs names and modify only the needed parts)",
+  window_sizes = {
+    output = 15,
+    info = nil,
+    input = -2,
+  },
+  filetype = "markdown",
+  chat_history_dir = vim.fn.expand("$HOME/.llm_chat_history"),
+  cache_dir = vim.fn.stdpath("cache") .. "/llm_nvim",
+  keys = {
+    cycle_forward = "<Tab>",
+    cycle_backward = "<S-Tab>",
+    close_windows = "<Leader>q",
+    add_file_to_context = "<leader>za",
+    add_buffers_to_context = "<leader>zb",
+    add_dir_to_context = "<leader>zd",
+    toggle_windows = "<leader>zt",
+    focus_window = "<Leader>zf",
+    send_input = "<CR>",
+  },
+}

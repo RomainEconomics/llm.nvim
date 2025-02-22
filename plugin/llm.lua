@@ -1,8 +1,5 @@
--- vim.opt.runtimepath:append("~/Documents/repos/llm.nvim")
--- require("llm").llm({
---   model = "claude-3-5-haiku-20241022",
---   -- window_sizes = {
---   --   info = 3, -- height of info window
---   -- },
--- })
+vim.opt.runtimepath:append("~/Documents/repos/llm.nvim")
 -- require("llm").llm_with_picker()
+-- require("llm").llm_with_history()
+require("llm").llm()
+-- require("llm").llm({ model = "gpt-4o" })

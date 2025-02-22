@@ -1,5 +1,7 @@
 local windows = require("llm.ui.windows")
 local utils = require("llm.utils.utils")
+local mini_icons = require("mini.icons")
+local files = require("llm.utils.files")
 local M = {}
 
 ---Send input
@@ -37,7 +39,9 @@ function M.pick_files(config)
           table.insert(files_in_context, v)
         end
       end
-      table.insert(files_in_context, item.file)
+
+      local icon = files.get_icon(item.file)
+      table.insert(files_in_context, icon .. item.file)
 
       local clean_files_in_context = utils.remove_duplicates(files_in_context)
 
