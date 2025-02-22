@@ -1,4 +1,5 @@
 local chat = require("llm.chat")
+-- TODO: add typing
 local M = {}
 
 M.windows = nil
@@ -51,9 +52,10 @@ end
 ---@param existing_buffers? table
 ---@return table
 function M.create_windows(config, existing_buffers)
-  if existing_buffers == nil then
-    chat.reset_provider() -- Reset provider only when creating windows from scratch (not when toggling windows on/off)
-  end
+  -- TODO: to see if this needs to be added again
+  -- if existing_buffers == nil then
+  --   chat.reset_provider() -- Reset provider only when creating windows from scratch (not when toggling windows on/off)
+  -- end
   existing_buffers = existing_buffers or {}
 
   -- Create the main vertical split
@@ -98,6 +100,7 @@ function M.create_windows(config, existing_buffers)
   local input_win = vim.api.nvim_get_current_win()
 
   -- Store window handles
+  -- TODO: add typing
   M.windows = {
     output = { buf = output_buf, win = output_win },
     info = { buf = info_buf, win = info_win },

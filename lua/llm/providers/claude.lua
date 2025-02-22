@@ -16,9 +16,10 @@ end
 ---Call Anthropic API chat
 ---@param content string
 ---@param config Config
+---@param callback function
 ---@param files_context string?
 ---@return string
-function Claude:call(content, config, files_context)
+function Claude:call(content, config, callback, files_context)
   local accumulated_message = ""
 
   -- No system prompt with claude models. Instead passed through the request itself
@@ -76,6 +77,7 @@ function Claude:call(content, config, files_context)
         return
       elseif type == "message_stop" then
         self.messages = self:build_messages("assistant", accumulated_message)
+        callback()
         return
       end
 
