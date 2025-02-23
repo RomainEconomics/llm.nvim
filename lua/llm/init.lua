@@ -26,8 +26,6 @@ local default_config = require("llm.config_defaults")
 M.config = default_config
 
 ---@param opts Config?
--- you can define your setup function here. Usually configurations can be merged, accepting outside params and
--- you can also put some validation here for those.
 M.setup = function(opts)
   M.config = vim.tbl_deep_extend("force", M.config, opts or {})
 end
@@ -37,20 +35,68 @@ M.health = function()
   require("llm.health").check()
 end
 
-M.llm = function(opts)
-  M.setup(opts)
-  chat.load_provider(M.config.model)
+-- M.llm = function(opts)
+--   M.setup(opts)
+--   chat.load_provider(M.config.model)
+--
+--   local cache_info = cache.load_cache(M.config)
+--   if cache_info ~= nil then
+--     local metadata = history.parse_chat_filename(cache_info.history_path)
+--     if cache_info.model == M.config.model then
+--       return M._resume_chat(metadata.date, metadata.chat_uid, opts)
+--     else
+--       Snacks.notify.warn("LLM provided is different from the last chat. Creating a new one...")
+--     end
+--   end
+--   return ui.setup(M.config)
+-- end
 
-  local cache_info = cache.load_cache(M.config)
+-- Create a helper function to handle the visual selection
+local function handle_visual_selection(windows)
+  local selected_text = require("llm.utils.selection").get_visual_selection()
+  if not selected_text then
+    return false
+  end
+
+  -- Format the selected text with filetype
+  local formatted_text = string.format("\n```%s\n%s\n```\n", vim.bo.filetype, selected_text)
+
+  -- Add the formatted text to the input buffer
+  if windows and windows.input and vim.api.nvim_buf_is_valid(windows.input.buf) then
+    vim.api.nvim_buf_set_lines(windows.input.buf, 0, -1, false, vim.split(formatted_text, "\n"))
+    vim.cmd("normal! G") -- Move cursor to the bottom
+  end
+  return true
+end
+
+-- Create a unified start_chat function
+local function start_chat(config, with_selection)
+  chat.load_provider(config.model)
+
+  local cache_info = cache.load_cache(config)
   if cache_info ~= nil then
     local metadata = history.parse_chat_filename(cache_info.history_path)
-    if cache_info.model == M.config.model then
-      return M._resume_chat(metadata.date, metadata.chat_uid, opts)
+    if cache_info.model == config.model then
+      return M._resume_chat(metadata.date, metadata.chat_uid, config)
     else
       Snacks.notify.warn("LLM provided is different from the last chat. Creating a new one...")
     end
   end
-  return ui.setup(M.config)
+
+  local windows = ui.setup(config)
+
+  if with_selection then
+    if not handle_visual_selection(windows) then
+      Snacks.notify.error("No text selected")
+    end
+  end
+
+  return windows
+end
+
+M.llm = function(opts)
+  M.setup(opts)
+  return start_chat(M.config, vim.fn.mode() == "v" or vim.fn.mode() == "V")
 end
 
 M.llm_with_picker = function(opts)
@@ -58,11 +104,49 @@ M.llm_with_picker = function(opts)
   model_picker.select_model(M.config, function(selected_model)
     if selected_model ~= nil then
       M.config.model = selected_model
-      chat.load_provider(selected_model)
     end
-    return ui.setup(M.config)
+    return start_chat(M.config, vim.fn.mode() == "v" or vim.fn.mode() == "V")
   end)
 end
+
+-- M.llm_with_visual_selection = function(opts)
+--   -- When starting a chat using visual selection, we don't use cache for now.
+--   M.setup(opts)
+--   chat.load_provider(M.config.model)
+--
+--   -- Get visual selection and current buffer filetype
+--   local selected_text = require("llm.utils.selection").get_visual_selection()
+--   if not selected_text then
+--     Snacks.notify.error("No text selected")
+--     return ui.setup(M.config)
+--   end
+--
+--   -- Setup the chat UI
+--   ui.setup(M.config)
+--   local windows = require("llm.ui.windows").windows
+--
+--   -- Format the selected text with filetype
+--   local formatted_text = string.format("\n```%s\n%s\n```\n", vim.bo.filetype, selected_text)
+--
+--   -- Add the formatted text to the input buffer
+--   if windows and windows.input and vim.api.nvim_buf_is_valid(windows.input.buf) then
+--     vim.api.nvim_buf_set_lines(windows.input.buf, 0, -1, false, vim.split(formatted_text, "\n"))
+--   end
+--
+--   -- Move cursor to the bottom of the input buffer
+--   vim.cmd("normal! G")
+-- end
+
+-- M.llm_with_picker = function(opts)
+--   M.setup(opts)
+--   model_picker.select_model(M.config, function(selected_model)
+--     if selected_model ~= nil then
+--       M.config.model = selected_model
+--       chat.load_provider(selected_model)
+--     end
+--     return ui.setup(M.config)
+--   end)
+-- end
 
 M.llm_with_history = function(opts)
   M.setup(opts)

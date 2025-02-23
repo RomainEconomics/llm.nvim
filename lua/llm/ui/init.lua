@@ -33,7 +33,7 @@ local function send_input(config)
   -- Call API provider
   local promise = chat.call_llm(input_text, config, files_content_in_context)
 
-  -- Create a timer to check for completion
+  -- Create a timer to check for last stream message completion (once it happens, we save chat and cache)
   local timer = vim.uv.new_timer()
   timer:start(
     100,

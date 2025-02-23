@@ -1,4 +1,3 @@
-local chat = require("llm.chat")
 -- TODO: add typing
 local M = {}
 
