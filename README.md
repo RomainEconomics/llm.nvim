@@ -4,9 +4,12 @@
 
 ```lua
 -- Examples
-vim.keymap.set('n', '<leader>zz', function() require('llm').llm_with_picker() end, { desc = 'Start LLM Chat' })
+vim.keymap.set({'n', 'v'}, '<leader>zz', function() require('llm').llm_with_picker() end, { desc = 'Start LLM Chat' })
 -- or
-vim.keymap.set('n', '<leader>zz', function() require('llm').llm() end, { desc = 'Start LLM Chat' })
+vim.keymap.set({'n', 'v'}, '<leader>zz', function() require('llm').llm() end, { desc = 'Start LLM Chat' })
+
+vim.keymap.set("n", "<leader>zh", function() require("llm").llm_with_history() end, { desc = "Start LLM Chat" })
+
 ```
 
 ## TODOs
@@ -23,7 +26,7 @@ vim.keymap.set('n', '<leader>zz', function() require('llm').llm() end, { desc = 
 
 ### History
 
-- [ ] be able to persist the last chat between neovim sessions (should be able
+- [x] be able to persist the last chat between neovim sessions (should be able
       to quit nvim, restart and have access again to the chat)
 - [x] have chats stored in files (`\chat_storage\{year-month-day}\{datetime}\chat.json`)
 - [x] can resume chat from history
@@ -41,7 +44,8 @@ vim.keymap.set('n', '<leader>zz', function() require('llm').llm() end, { desc = 
 ### Multi Models
 
 - [ ] add function to start multi model prompt request -> same prompt send to
-      many models
+      many models - [ ] to create tabs or hidden buffers, should use snacks.win /
+      snacks.layout insteaf
 - [ ] add a tab for the output tab
 
 ### UI
@@ -55,7 +59,7 @@ vim.keymap.set('n', '<leader>zz', function() require('llm').llm() end, { desc = 
 
 ### Keymaps
 
-- [ ] start chat from visual selection
+- [x] start chat from visual selection
 - [x] add focus input keymap
 - [x] create global keymaps
 - [ ] file context:
