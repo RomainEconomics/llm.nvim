@@ -71,4 +71,50 @@ function M.get_visual_selection()
   return result
 end
 
+-- Format visual selected text
+---@param selected_text string?
+---@param filetype string?
+---@return boolean
+function M.format_visual_selection(selected_text, filetype)
+  if not selected_text then
+    return false
+  end
+  local windows = require("llm.ui.windows").windows
+
+  -- Format the selected text with filetype
+  local formatted_text = string.format("\n```%s\n%s\n```\n", filetype, selected_text)
+
+  -- Add the formatted text to the input buffer
+  if windows and windows.input and vim.api.nvim_buf_is_valid(windows.input.buf) then
+    vim.api.nvim_buf_set_lines(windows.input.buf, 0, -1, false, vim.split(formatted_text, "\n"))
+    vim.cmd("normal! G") -- Move cursor to the bottom
+  end
+  return true
+end
+
+--- Handle the visual selection formatting and context updates
+---@param visual_selection VisualSelection
+---@param filetype string
+function M.handle_visual_selection(visual_selection, filetype)
+  if not M.format_visual_selection(visual_selection.text, filetype) then
+    Snacks.notify.error("No text selected")
+    return
+  end
+
+  local windows = require("llm.ui.windows").windows
+  if not (windows and windows.info and vim.api.nvim_buf_is_valid(windows.info.buf)) then
+    return
+  end
+
+  -- Update context with file information
+  local info_lines = vim.api.nvim_buf_get_lines(windows.info.buf, 0, -1, false)
+  local files_in_context = { visual_selection.file_path }
+  for _, v in ipairs(info_lines) do
+    if v ~= "" and v ~= visual_selection.file_path then
+      table.insert(files_in_context, v)
+    end
+  end
+  vim.api.nvim_buf_set_lines(windows.info.buf, 0, -1, false, files_in_context)
+end
+
 return M
