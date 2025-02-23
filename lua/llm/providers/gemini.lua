@@ -129,4 +129,15 @@ function Gemini:build_messages(role, content, system_prompt)
   return self.messages
 end
 
+---Handle Gemini conversation formatting
+---@param parts table
+---@return string
+function M.handle_gemini_content(parts)
+  local s = ""
+  for _, p in ipairs(parts) do
+    s = s .. p.text .. "\n"
+  end
+  return s
+end
+
 return M

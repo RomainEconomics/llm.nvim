@@ -26,5 +26,6 @@ return {
     toggle_windows = "<leader>zt",
     focus_window = "<Leader>zf",
     send_input = "<CR>",
+    clear_chat = "<leader>zc",
   },
 }

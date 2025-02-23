@@ -77,14 +77,33 @@ function M.pick_history(config, callback)
           table.insert(formatted_conv, line)
         end
 
-        for _, x in ipairs(data.conversations) do
-          if x.role == "user" then
-            local lines = vim.split(x.content, "\n")
-            local formatted_lines = process_input(lines)
-            table.insert(formatted_conv, formatted_lines)
-          elseif x.role == "system" then
-          else
-            table.insert(formatted_conv, x.content)
+        if string.find(data.model, "gemini") then
+          -- Gemini case
+          local gemini = require("llm.providers.gemini")
+          for _, x in ipairs(data.conversations.contents) do
+            if x.role == "user" then
+              local content = gemini.handle_gemini_content(x.parts)
+              local lines = vim.split(content, "\n")
+              local formatted_lines = process_input(lines)
+              table.insert(formatted_conv, formatted_lines)
+            elseif x.role == "system" then
+            elseif x.role == "model" then -- For Gemini responses
+              table.insert(formatted_conv, gemini.handle_gemini_content(x.parts))
+            else
+              Snacks.notify.warn("Unknown role")
+            end
+          end
+        else
+          -- Openai/Anthropic case
+          for _, x in ipairs(data.conversations) do
+            if x.role == "user" then
+              local lines = vim.split(x.content, "\n")
+              local formatted_lines = process_input(lines)
+              table.insert(formatted_conv, formatted_lines)
+            elseif x.role == "system" then
+            else
+              table.insert(formatted_conv, x.content)
+            end
           end
         end
       end

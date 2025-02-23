@@ -123,6 +123,7 @@ function M.create_windows(config, existing_buffers)
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = output_buf })
   vim.api.nvim_set_option_value("modifiable", true, { buf = output_buf })
   vim.api.nvim_set_option_value("filetype", config.filetype, { buf = output_buf })
+  vim.api.nvim_set_option_value("filetype", config.filetype, { buf = input_buf })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = input_buf })
 
   M.is_visible = true

@@ -6,6 +6,7 @@ local session = require("llm.session")
 local windows = require("llm.ui.windows")
 local history = require("llm.history")
 local cache = require("llm.cache")
+local gemini = require("llm.providers.gemini")
 
 local M = {}
 
@@ -64,18 +65,22 @@ function M.setup(config, messages)
 
   if messages ~= nil then
     -- local formatted_msg = {}
-    for _, v in ipairs(messages) do
+
+    -- Gemini models uses contents keys, others do not
+    local data = messages.contents or messages
+
+    for _, v in ipairs(data) do
       if v.role == "system" then
       elseif v.role == "user" then
-        local lines, _ = input_processor.process_input(vim.split(v.content, "\n"))
+        local content = v.content or gemini.handle_gemini_content(v.parts)
+        local lines, _ = input_processor.process_input(vim.split(content, "\n"))
         vim.api.nvim_buf_set_lines(chat_windows.output.buf, -1, -1, false, lines)
         vim.api.nvim_buf_set_lines(chat_windows.output.buf, -1, -1, false, { "" })
       else
-        -- table.insert(formatted_msg, v.content)
-        vim.api.nvim_buf_set_lines(chat_windows.output.buf, -1, -1, false, vim.split(v.content, "\n"))
+        local content = v.content or gemini.handle_gemini_content(v.parts)
+        vim.api.nvim_buf_set_lines(chat_windows.output.buf, -1, -1, false, vim.split(content, "\n"))
       end
     end
-    -- vim.api.nvim_buf_set_lines(chat_windows.output.buf, 0, -1, false, formatted_msg)
   end
 
   --

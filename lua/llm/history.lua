@@ -56,8 +56,6 @@ M.save_chat = function(config, messages)
     chat_data.chat_date = config.chat_date
     chat_data.conversations = messages
 
-    -- Snacks.debug("CHAT DATA", chat_data)
-
     -- Write the chat data to the file
     local file, err = io.open(filepath, "w")
     if not file then

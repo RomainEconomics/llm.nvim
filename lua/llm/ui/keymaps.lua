@@ -50,6 +50,9 @@ function M.setup_buffer_keymaps(buf, config, callbacks)
   if callbacks.send then
     vim.keymap.set("n", config.keys.send_input, callbacks.send, { buffer = buf, desc = "Send chat message" })
   end
+
+  -- Clear chat keymap
+  vim.keymap.set("n", config.keys.clear_chat, callbacks.clear_chat, { buffer = buf, desc = "Clear chat windows" })
 end
 
 -- TODO: add param type for windows
@@ -78,6 +81,24 @@ function M.buffer_keymaps(config, chat_windows, send_input)
     end,
     focus_input_window = function()
       vim.api.nvim_set_current_win(windows.windows.input.win)
+    end,
+    clear_chat = function()
+      local chat = require("llm.chat")
+      local session = require("llm.session")
+      local output_buf = windows.windows.output.buf
+      local info_buf = windows.windows.info.buf
+      local input_buf = windows.windows.input.buf
+
+      vim.api.nvim_buf_set_lines(output_buf, 0, -1, false, {})
+      vim.api.nvim_buf_set_lines(info_buf, 0, -1, false, {})
+      vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, {})
+
+      chat.reset_provider()
+      chat.load_provider(config.model)
+
+      config.chat_uid = nil
+      config.chat_date = nil
+      session.initialize_session(chat_windows.output.buf, config)
     end,
   }
 
