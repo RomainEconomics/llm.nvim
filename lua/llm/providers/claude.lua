@@ -36,8 +36,6 @@ function Claude:call(content, config, callback, files_context)
     })
   end
 
-  Snacks.notifier.notify("Start calling claude", "info")
-
   curl.post("https://api.anthropic.com/v1/messages", {
     raw = { "--no-buffer", "--silent", "--show-error" },
     headers = {
