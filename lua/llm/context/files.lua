@@ -26,13 +26,15 @@ function M.get_files_context(info_buf)
       error("File path format is not the expected one")
     end
 
-    local lines = vim.fn.readfile(clean_filepath)
-    local s = table.concat(lines, "\n")
-    local file_type = get_extension(clean_filepath)
-    table.insert(
-      files_context,
-      "FILEPATH: " .. clean_filepath .. "\n\nCONTEXT:\n```" .. file_type .. "\n" .. s .. "\n```"
-    )
+    if clean_filepath ~= "" then
+      local lines = vim.fn.readfile(clean_filepath)
+      local s = table.concat(lines, "\n")
+      local file_type = get_extension(clean_filepath)
+      table.insert(
+        files_context,
+        "FILEPATH: " .. clean_filepath .. "\n\nCONTEXT:\n```" .. file_type .. "\n" .. s .. "\n```"
+      )
+    end
   end
 
   return table.concat(files_context, "\n\n")
