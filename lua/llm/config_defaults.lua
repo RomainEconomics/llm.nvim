@@ -1,10 +1,11 @@
 return {
   model = "gpt-4o-mini",
   available_models = {
+    "claude-3-7-sonnet-20250219",
     "claude-3-5-haiku-20241022",
-    "claude-3-5-sonnet-20241022",
-    "gpt-4o",
+    -- "claude-3-5-sonnet-20241022",
     "gpt-4o-mini",
+    "gpt-4o",
     "gemini-2.0-flash",
   },
   system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. You code mainly using Python and Lua. Prefer answering using markdowm formatting. When answering, you don't need to send back the provided context if you don't modify it (like if given a file with function and classes, if they are long, you can only define theirs names and modify only the needed parts)",
