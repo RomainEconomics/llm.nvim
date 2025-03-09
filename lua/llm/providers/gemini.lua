@@ -72,12 +72,22 @@ function Gemini:call(content, config, callback, files_context)
         buf_updates.update_output_buffer(msg)
 
         if finished == "STOP" then
-          -- Snacks.debug("END STREAM")
-          -- Snacks.debug("FInal message", accumulated_message)
           local metadata = data.usageMetadata
-          -- Snacks.debug(metadata)
+
           -- We add model response to the `self.messages` and not the copy
           self.messages = self:build_messages("assistant", accumulated_message)
+
+          Snacks.notifier.notify(
+            "Input tokens: "
+              .. metadata.promptTokenCount
+              .. " | Output tokens: "
+              .. metadata.candidatesTokenCount
+              .. " | Total token: "
+              .. metadata.totalTokenCount,
+            "info",
+            { title = "Token usage" }
+          )
+
           callback()
           return
         end

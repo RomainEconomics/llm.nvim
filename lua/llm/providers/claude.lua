@@ -36,6 +36,8 @@ function Claude:call(content, config, callback, files_context)
     })
   end
 
+  local token_usage = { input_tokens = nil, output_tokens = nil }
+
   curl.post("https://api.anthropic.com/v1/messages", {
     raw = { "--no-buffer", "--silent", "--show-error" },
     headers = {
@@ -46,7 +48,7 @@ function Claude:call(content, config, callback, files_context)
     body = vim.fn.json_encode({
       model = config.model,
       messages = copy_messages,
-      max_tokens = 4096,
+      max_tokens = config.max_tokens,
       stream = true,
     }),
     system = config.system_prompt,
@@ -62,25 +64,36 @@ function Claude:call(content, config, callback, files_context)
       end
 
       local type = data["type"]
-      if
-        type == "message_start" -- can be used to get input tokens
-        or type == "content_block_start"
-        or type == "ping"
-        or type == "content_block_stop"
-        or type == "message_delta" -- can be used to get output tokens
-      then
+
+      if type == "content_block_start" or type == "ping" or type == "content_block_stop" then
+        return
+      elseif type == "message_start" then
+        token_usage.input_tokens = data.message.usage.input_tokens
+        return
+      elseif type == "message_delta" then
+        token_usage.output_tokens = data.usage.output_tokens
         return
       elseif type == "error" then
         Snacks.debug(data)
         return
       elseif type == "message_stop" then
         self.messages = self:build_messages("assistant", accumulated_message)
+        Snacks.notifier.notify(
+          "Input tokens: "
+            .. token_usage.input_tokens
+            .. " | Output tokens: "
+            .. token_usage.output_tokens
+            .. " | Total tokens: "
+            .. token_usage.input_tokens + token_usage.output_tokens,
+          "info",
+          { title = "Token usage" }
+        )
+
         callback()
         return
       end
 
       local msg = data.delta.text
-      -- Snacks.debug(data, "msg", msg)
 
       if msg == nil then
         return
