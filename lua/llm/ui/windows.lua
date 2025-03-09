@@ -51,10 +51,6 @@ end
 ---@param existing_buffers? table
 ---@return table
 function M.create_windows(config, existing_buffers)
-  -- TODO: to see if this needs to be added again
-  -- if existing_buffers == nil then
-  --   chat.reset_provider() -- Reset provider only when creating windows from scratch (not when toggling windows on/off)
-  -- end
   existing_buffers = existing_buffers or {}
 
   -- Create the main vertical split
@@ -69,7 +65,11 @@ function M.create_windows(config, existing_buffers)
     output_buf = existing_buffers.output
   else
     output_buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_name(output_buf, "ChatOutput")
+    -- Check if a buffer with this name already exists
+    local buffer_exists = vim.fn.bufnr("ChatOutput") ~= -1
+    if not buffer_exists then
+      vim.api.nvim_buf_set_name(output_buf, "ChatOutput")
+    end
   end
   vim.api.nvim_win_set_buf(0, output_buf)
   local output_win = vim.api.nvim_get_current_win()
@@ -81,7 +81,11 @@ function M.create_windows(config, existing_buffers)
     info_buf = existing_buffers.info
   else
     info_buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_name(info_buf, "ChatInfo")
+    -- Check if a buffer with this name already exists
+    local buffer_exists = vim.fn.bufnr("ChatInfo") ~= -1
+    if not buffer_exists then
+      vim.api.nvim_buf_set_name(info_buf, "ChatInfo")
+    end
   end
   vim.api.nvim_win_set_buf(0, info_buf)
   local info_win = vim.api.nvim_get_current_win()
@@ -93,7 +97,11 @@ function M.create_windows(config, existing_buffers)
     input_buf = existing_buffers.input
   else
     input_buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_name(input_buf, "ChatInput")
+    -- Check if a buffer with this name already exists
+    local buffer_exists = vim.fn.bufnr("ChatInput") ~= -1
+    if not buffer_exists then
+      vim.api.nvim_buf_set_name(input_buf, "ChatInput")
+    end
   end
   vim.api.nvim_win_set_buf(0, input_buf)
   local input_win = vim.api.nvim_get_current_win()
