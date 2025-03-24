@@ -19,6 +19,8 @@ vim.keymap.set("n", "<leader>zh", function() require("llm").llm_with_history() e
 - [ ] add custom prompt and ability to switch
   - system prompts + simple prompts
 - [ ] have a project context (where to store it ? `PROJECT CONTEXT: `)
+  - [ ] be able to provide the tree structure of a project, without the content
+        itself (`tree --no-user --no-filesize --no-time --no-permissions --no-git -L 4`)
 
 ### Git Diffs
 
@@ -70,7 +72,12 @@ vim.keymap.set("n", "<leader>zh", function() require("llm").llm_with_history() e
 
 ### Others
 
+- [ ] add url as a context (llm.txt or html to md ? for documentation pages for
+      ex)
+- [ ] add rag support ? could use weaviate I guess
 - [ ] count the number of tokens
 - [ ] support passing images
 - [ ] Checks what happen when api key invalid for each provider (at the moment
       it may silently fail)
+- [x] when tokens are being streamed, the cursor is forced to be at the bottom
+      of the output panel. (see: `lua/avante/sidebar.lua`)

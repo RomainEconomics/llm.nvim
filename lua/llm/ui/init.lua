@@ -63,6 +63,8 @@ function M.setup(config, messages)
   local chat_windows = windows.create_windows(config)
   session.initialize_session(chat_windows.output.buf, config)
 
+  require("llm.ui.buffer_updates").setup_scroll_keymaps(chat_windows.output)
+
   if messages ~= nil then
     -- local formatted_msg = {}
 
