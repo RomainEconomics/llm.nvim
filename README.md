@@ -14,11 +14,65 @@ vim.keymap.set("n", "<leader>zh", function() require("llm").llm_with_history() e
 
 ## TODOs
 
+- [ ] ensures providers can use cache
+- [ ] add command to end a chat immediately
+- [ ] when chat starts, the cursor should go to the chat stream, instead of
+      waiting in input window
+
 ### Prompts
 
 - [ ] add custom prompt and ability to switch
   - system prompts + simple prompts
 - [ ] have a project context (where to store it ? `PROJECT CONTEXT: `)
+
+### User Rules / Project rules
+
+`User rules`
+
+```
+Ensure the generated code is well organized and modular, with clear separation
+of concerns.
+
+Use descriptive variable, function and class names that reflect their purposes.
+
+Include concise, meaningful inline comments dans documentation to explain
+non-obvious logic.
+
+Adhere to established coding standards and style guides relevant to the langague
+or framework used.
+
+Write code that is maintainable, with proper error handling and clear boundaries
+for functionality.
+
+Avoid overly complex or deeply nested structures by favoring simplicity and
+clarity.
+
+Optimize for performance and security by following best practices and using
+efficient algorithms.
+
+Incorporate unit tests or example test cases to demonstrate and verify
+functionality.
+
+Write code that is self-contained with minimal dependencies (or reused already
+existing dependencies), to facilitate easy integration into larger projects.
+
+Split code into separate files with meaningful names, and avoid large files with
+more that 300 lines of code
+```
+
+`Project rules`
+
+`Frontend rules`
+
+```
+Use Nextjs with tanstack query and tailwind and shadcn
+```
+
+`Backend rules`
+
+```
+Use fastapi and sqlalchemy
+```
 
 ### Git Diffs
 
