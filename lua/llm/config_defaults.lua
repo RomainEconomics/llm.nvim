@@ -1,16 +1,17 @@
 return {
-  model = "gpt-4o-mini",
+  model = "gpt-4.1-mini",
   available_models = {
     "claude-3-7-sonnet-20250219",
     "claude-3-5-haiku-20241022",
     -- "claude-3-5-sonnet-20241022",
-    "gpt-4o-mini",
-    "gpt-4o",
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "o4-mini",
     "gemini-2.5-pro-preview-03-25",
-    "gemini-2.0-flash",
+    "gemini-2.5-flash-preview-04-17",
   },
-  system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. You code mainly using Python and Lua. Prefer answering using markdowm formatting. When answering, you don't need to send back the provided context if you don't modify it (like if given a file with function and classes, if they are long, you can only define theirs names and modify only the needed parts). When giving response, you must ensure you don't stop in a middle of sentence.",
-  max_tokens = 8192,
+  system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. When writing codes, add proper typing when possible. Prefer answering using markdowm formatting. When answering, you don't need to send back the provided context if you don't modify it (like if given a file with function and classes, if they are long, you can only define theirs names and modify only the needed parts). When giving response, you must ensure you don't stop in a middle of sentence.",
+  max_tokens = 12192,
   window_sizes = {
     output = 15,
     info = nil,
