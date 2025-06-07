@@ -8,7 +8,7 @@ return {
     "gpt-4.1",
     "gpt-4.1-mini",
     "o4-mini",
-    "gemini-2.5-pro-preview-03-25",
+    "gemini-2.5-pro-preview-06-05",
     "gemini-2.5-flash-preview-04-17",
   },
   system_prompt = "You're a professional programmer. You should prefer short, concise and precise answers. When writing codes, add proper typing when the language allows it. Prefer answering using markdowm formatting. If you're requested to use Python, target python 3.11+ and use types where necessary. When using types for python, avoid writing 'Optional' and use the '|' operator instead as it is more modern. When answering, you don't need to send back the provided context if you don't modify it. For exemple, if the functions and classes within a file are too long, you can simply define theirs names and modify only the needed parts.",
