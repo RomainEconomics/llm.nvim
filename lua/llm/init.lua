@@ -5,6 +5,7 @@ local history_picker = require("llm.pickers.history")
 local history = require("llm.history")
 local cache = require("llm.cache")
 local selection = require("llm.utils.selection")
+local projects_picker = require("llm.pickers.projects")
 
 ---@class Config
 ---@field model string Default model to use
@@ -17,6 +18,7 @@ local selection = require("llm.utils.selection")
 ---@field chat_history_dir string Location for the chat history
 ---@field chat_uid string? Chat history uuid
 ---@field chat_date string? Chat date
+---@field project_name string? Current project name
 
 ---@class MyModule
 local M = {}
@@ -58,10 +60,49 @@ end
 
 M.llm_with_history = function(opts)
   M.setup(opts)
-  history_picker.pick_history(M.config, function(selected_file_history)
-    if selected_file_history ~= nil then
-      local metadata = history.parse_chat_filename(selected_file_history)
-      M._resume_chat(metadata.date, metadata.chat_uid, opts)
+  local projects = require("llm.projects")
+
+  projects_picker.pick_projects(M.config, function(selected_project)
+    if selected_project then
+      -- Ensure project exists and is properly initialized
+      if not projects.project_exists(M.config, selected_project) then
+        Snacks.notify.error("Project does not exist: " .. selected_project)
+        return
+      end
+
+      -- Get project configuration
+      local project_config = projects.get_project(M.config, selected_project)
+      if not project_config then
+        Snacks.notify.error("Failed to load project configuration: " .. selected_project)
+        return
+      end
+
+      -- Update config with project settings
+      M.config.project_name = selected_project
+      M.config.system_prompt = project_config.system_prompt
+      if project_config.default_model then
+        M.config.model = project_config.default_model
+      end
+
+      -- Now pick history file
+      history_picker.pick_history(M.config, function(selected_file_history)
+        if selected_file_history ~= nil then
+          local metadata = history.parse_chat_filename(selected_file_history)
+          M._resume_chat(metadata.date, metadata.chat_uid, M.config)
+        end
+      end)
+    end
+  end)
+end
+
+M.llm_with_project = function(opts)
+  M.setup(opts)
+  local visual_selection = require("llm.utils.selection").get_visual_selection()
+
+  projects_picker.pick_projects(M.config, function(selected_project)
+    if selected_project then
+      M.config.project_name = selected_project
+      M._start_chat(M.config, visual_selection)
     end
   end)
 end
@@ -79,6 +120,10 @@ M._resume_chat = function(date, chat_uid, opts)
     M.config.model = chat_data.model
     M.config.system_prompt = chat_data.system_prompt
     M.config.chat_date = chat_data.chat_date
+
+    if chat_data.project_name and not M.config.project_name then
+      M.config.project_name = chat_data.project_name
+    end
     -- Load provider with existing messages
     chat.load_provider(chat_data.model, chat_data.conversations)
     return ui.setup(M.config, chat_data.conversations)
