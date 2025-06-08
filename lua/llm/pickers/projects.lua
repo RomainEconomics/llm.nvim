@@ -149,7 +149,6 @@ function M.update_project_picker(config)
           box = "vertical",
           border = "rounded",
           title = "Update Project",
-          { win = "input", height = 1, border = "bottom" },
           { win = "list", border = "none" },
         },
       },
@@ -170,15 +169,25 @@ function M.update_project_picker(config)
     confirm = function(picker, item)
       picker:close()
 
-      -- Get new system prompt from input
-      local system_prompt = vim.api.nvim_buf_get_lines(picker.input_win.buf, 0, -1, false)
-      system_prompt = table.concat(system_prompt, "\n")
+      -- Show system prompt input with current project's prompt
+      Snacks.input.input({
+        title = "Update system prompt",
+        prompt = "System prompt: ",
+        default = item.project.system_prompt,
+        win = {
+          height = 3,
+          style = "input",
+        },
+      }, function(system_prompt)
+        if not system_prompt or system_prompt == "" then
+          Snacks.notifier.notify("System prompt cannot be empty", "error", { title = "Error" })
+          return
+        end
 
-      if system_prompt then
         if projects.update_project(config, item.project.name, system_prompt) then
           Snacks.notifier.notify("Project updated: " .. item.project.name, "info", { title = "Project updated" })
         end
-      end
+      end)
     end,
   })
 end
