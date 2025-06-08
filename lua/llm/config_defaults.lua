@@ -32,5 +32,10 @@ return {
     focus_window = "<Leader>zf",
     send_input = "<CR>",
     clear_chat = "<leader>zc",
+    switch_model = "<leader>zm",
+    -- Project management keymaps
+    select_project = "<leader>zP",
+    create_project = "<leader>zN",
+    update_project = "<leader>zu",
   },
 }

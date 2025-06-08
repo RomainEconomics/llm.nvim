@@ -34,7 +34,6 @@ function M.select_model(config, callback)
     },
     confirm = function(picker, item)
       picker:close()
-      -- Snacks.notifier.notify(item.file, "info", { title = "Model chosen" })
       callback(item.file)
     end,
   })

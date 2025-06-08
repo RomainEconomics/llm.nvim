@@ -7,7 +7,6 @@ local M = {}
 local function get_directories()
   local directories = {}
 
-  -- local handle = io.popen("fd . --type directory --hidden")
   local handle = io.popen("fd . --type directory")
   if handle then
     for line in handle:lines() do

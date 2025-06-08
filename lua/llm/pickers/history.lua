@@ -30,13 +30,30 @@ end
 ---@param config Config
 ---@param callback function
 function M.pick_history(config, callback)
-  Snacks.picker.files({
-    cwd = config.chat_history_dir,
+  local projects = require("llm.projects")
+  local project_dir = projects.get_project_directory(config, config.project_name)
 
+  Snacks.picker.files({
+    cwd = project_dir,
+    hidden = true,
+    finder = function()
+      local items = {}
+      local files = vim.fn.glob(project_dir .. "/**/*.json", false, true)
+
+      for _, file in ipairs(files) do
+        if not file:match("project_config.json$") then
+          local relative_path = vim.fn.fnamemodify(file, ":.")
+          table.insert(items, {
+            file = relative_path,
+            text = relative_path,
+          })
+        end
+      end
+      return items
+    end,
     actions = {
       delete_file = function(picker, item)
-        local file_path = vim.fs.joinpath(item.cwd, item.file)
-        vim.fs.rm(file_path)
+        vim.fs.rm(item.file)
         picker:find()
       end,
     },
@@ -49,8 +66,6 @@ function M.pick_history(config, callback)
     },
     preview = function(ctx)
       local path = Snacks.picker.util.path(ctx.item)
-      -- ctx.preview:set_title(ctx.item.title)
-
       local data = read_json_file(path)
 
       if data == nil then
@@ -68,6 +83,7 @@ function M.pick_history(config, callback)
           "- Date: " .. (data.chat_date or ""),
           "- Model: " .. (data.model or ""),
           "- Chat ID: " .. (data.chat_uid or ""),
+          "- Project: " .. (config.project_name or data.project_name or "No project"),
           "",
           "---",
           "",
@@ -114,30 +130,9 @@ function M.pick_history(config, callback)
     end,
     confirm = function(picker, item)
       picker:close()
+      Snacks.debug("Selected file: " .. item.file)
       Snacks.notifier.notify(item.file, "info", { title = "Start chat from this file history" })
       callback(item.file)
-
-      -- local info = windows.windows.info
-      --
-      -- local info_lines = vim.api.nvim_buf_get_lines(info.buf, 0, -1, false)
-      --
-      -- local files_in_context = {}
-      -- for _, v in ipairs(info_lines) do
-      --   if v ~= "" then
-      --     table.insert(files_in_context, v)
-      --   end
-      -- end
-      -- table.insert(files_in_context, item.file)
-      --
-      -- local clean_files_in_context = utils.remove_duplicates(files_in_context)
-      --
-      -- vim.api.nvim_buf_set_lines(info.buf, 0, -1, false, clean_files_in_context)
-      --
-      -- -- Ensures the focus is on the input buf
-      -- -- The function will run only after selection is made
-      -- vim.schedule(function()
-      --   vim.api.nvim_set_current_win(windows.windows.input.win)
-      -- end)
     end,
   })
 end
